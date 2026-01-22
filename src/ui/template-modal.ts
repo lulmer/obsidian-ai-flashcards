@@ -83,7 +83,7 @@ Rules:
 			.addText(text => {
 				this.nameInput = text.inputEl;
 				text.setValue(this.template.name)
-					.setPlaceholder('e.g., Medical Terms')
+					.setPlaceholder('e.g., Medical terms')
 					.setDisabled(isReadOnly)
 					.onChange(value => {
 						this.template.name = value;
@@ -105,7 +105,7 @@ Rules:
 			});
 
 		// System prompt (main instructions to the LLM)
-		contentEl.createEl('h3', { text: 'System Prompt' });
+		contentEl.createEl('h3', { text: 'System prompt' });
 		contentEl.createEl('p', {
 			text: 'Instructions that tell the AI how to generate flashcards. This sets the behavior and style.',
 			cls: 'setting-item-description'
@@ -124,7 +124,7 @@ Rules:
 		this.systemPromptArea.inputEl.addClass('template-textarea');
 
 		// Output instructions (format instructions)
-		contentEl.createEl('h3', { text: 'Output Format Instructions' });
+		contentEl.createEl('h3', { text: 'Output format instructions' });
 		contentEl.createEl('p', {
 			text: 'Tell the AI exactly what format to output. This is appended to the system prompt.',
 			cls: 'setting-item-description'
@@ -148,7 +148,7 @@ Rules:
 		if (this.mode === 'view') {
 			// View mode: Edit (copy) and Close buttons
 			if (this.template.isBuiltIn) {
-				const editCopyBtn = buttonContainer.createEl('button', { text: 'Edit as Copy' });
+				const editCopyBtn = buttonContainer.createEl('button', { text: 'Edit as copy' });
 				editCopyBtn.addEventListener('click', () => {
 					this.close();
 					// Create a copy for editing

@@ -5,7 +5,7 @@ import { createProvider } from '../providers';
 import { findTemplate, buildPrompt, BUILT_IN_TEMPLATES } from '../templates';
 import { parseFlashcards, formatForSpacedRepetition, createFlashcardHeader } from './parser';
 import { OutputHandler } from './output-handler';
-import { chunkContent, needsChunking, estimateTokens, type Chunk } from './chunker';
+import { chunkContent, needsChunking } from './chunker';
 
 export interface GenerationResult {
 	flashcards: Flashcard[];

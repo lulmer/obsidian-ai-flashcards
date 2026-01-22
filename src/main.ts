@@ -1,4 +1,4 @@
-import { MarkdownView, Notice, Plugin, setIcon } from 'obsidian';
+import { MarkdownView, Notice, Plugin } from 'obsidian';
 import type { FlashcardSettings } from './types';
 import { FlashcardError } from './types';
 import { DEFAULT_SETTINGS, FlashcardSettingTab } from './settings';
@@ -24,7 +24,7 @@ export default class AIFlashcardsPlugin extends Plugin {
 				const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 				if (activeView?.file) {
 					if (!checking) {
-						this.generateFlashcards();
+						void this.generateFlashcards();
 					}
 					return true;
 				}
@@ -33,8 +33,8 @@ export default class AIFlashcardsPlugin extends Plugin {
 		});
 
 		// Ribbon icon - deck of cards style (using "copy" icon which looks like stacked cards)
-		this.ribbonIconEl = this.addRibbonIcon('copy', 'Generate AI Flashcards', () => {
-			this.generateFlashcards();
+		this.ribbonIconEl = this.addRibbonIcon('copy', 'Generate AI flashcards', () => {
+			void this.generateFlashcards();
 		});
 
 		// Add custom styling to make it look more like cards
@@ -54,7 +54,7 @@ export default class AIFlashcardsPlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<FlashcardSettings>);
 	}
 
 	async saveSettings(): Promise<void> {
@@ -85,7 +85,7 @@ export default class AIFlashcardsPlugin extends Plugin {
 		this.updateUI(true, file.basename);
 
 		// Run generation in background - don't await to keep UI responsive
-		this.runGenerationInBackground(file);
+		void this.runGenerationInBackground(file);
 	}
 
 	/**
@@ -131,7 +131,7 @@ export default class AIFlashcardsPlugin extends Plugin {
 				this.ribbonIconEl.setAttribute('aria-label', 'Generating flashcards...');
 			} else {
 				this.ribbonIconEl.removeClass('is-generating');
-				this.ribbonIconEl.setAttribute('aria-label', 'Generate AI Flashcards');
+				this.ribbonIconEl.setAttribute('aria-label', 'Generate AI flashcards');
 			}
 		}
 

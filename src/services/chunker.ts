@@ -199,8 +199,16 @@ function combineParagraphsIntoChunks(paragraphs: string[], maxChars: number, ove
 function forceSplitLongText(text: string, maxChars: number, overlapChars: number): Chunk[] {
 	const chunks: Chunk[] = [];
 
-	// Try to split at sentence boundaries
-	const sentences = text.split(/(?<=[.!?])\s+/);
+	// Try to split at sentence boundaries (avoiding lookbehind for iOS compatibility)
+	const sentences = text.split(/([.!?])\s+/).reduce<string[]>((acc, part, i, arr) => {
+		// Combine each sentence ending with the preceding text
+		if (i % 2 === 0) {
+			// Text part
+			const ending = arr[i + 1] ?? '';
+			acc.push(part + ending);
+		}
+		return acc;
+	}, []);
 
 	let currentChunk = '';
 

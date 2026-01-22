@@ -104,8 +104,8 @@ export abstract class BaseLLMProvider {
 	 */
 	protected extractErrorMessage(response: RequestUrlResponse): string {
 		try {
-			const json = response.json;
-			return json?.error?.message || json?.message || JSON.stringify(json);
+			const json = response.json as { error?: { message?: string }; message?: string } | undefined;
+			return json?.error?.message ?? json?.message ?? JSON.stringify(json);
 		} catch {
 			return response.text || 'Unknown error';
 		}

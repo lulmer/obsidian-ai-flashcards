@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, TextAreaComponent, Notice, DropdownComponent } from 'obsidian';
+import { App, PluginSettingTab, Setting, TextAreaComponent, Notice } from 'obsidian';
 import type AIFlashcardsPlugin from './main';
 import type { FlashcardSettings, FlashcardTemplate, LLMProviderType } from './types';
 import { BUILT_IN_TEMPLATES, getAllTemplates } from './templates';
@@ -69,7 +69,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		// Header
-		containerEl.createEl('h1', { text: 'AI Flashcards Settings' });
+		;
 
 		// Provider Selection
 		this.renderProviderSection(containerEl);
@@ -88,7 +88,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 	}
 
 	private renderProviderSection(containerEl: HTMLElement): void {
-		containerEl.createEl('h2', { text: 'LLM Provider' });
+		new Setting(containerEl).setName("LLM provider").setHeading();
 
 		new Setting(containerEl)
 			.setName('Active provider')
@@ -109,7 +109,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 	private renderApiKeySection(containerEl: HTMLElement): void {
 		const provider = this.plugin.settings.activeProvider;
 
-		containerEl.createEl('h2', { text: 'API Configuration' });
+		new Setting(containerEl).setName("API configuration").setHeading();
 
 		switch (provider) {
 			case 'openai':
@@ -279,10 +279,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 			.setName('Model')
 			.setDesc(`Select a model${lastUpdatedText}`);
 
-		let dropdown: DropdownComponent | null = null;
-
 		setting.addDropdown(dd => {
-			dropdown = dd;
 
 			// Add models to dropdown
 			if (allModels.length > 0) {
@@ -387,7 +384,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 	}
 
 	private renderOutputSection(containerEl: HTMLElement): void {
-		containerEl.createEl('h2', { text: 'Output' });
+		new Setting(containerEl).setName("Output").setHeading();
 
 		new Setting(containerEl)
 			.setName('Output mode')
@@ -418,7 +415,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 	}
 
 	private renderTemplateSection(containerEl: HTMLElement): void {
-		containerEl.createEl('h2', { text: 'Templates' });
+		new Setting(containerEl).setName("Templates").setHeading();
 
 		const templates = getAllTemplates(this.plugin.settings.customTemplates);
 		const activeTemplate = templates.find(t => t.id === this.plugin.settings.activeTemplateId)
@@ -455,7 +452,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 		if (activeTemplate) {
 			// View/Edit button
 			const editBtn = buttonContainer.createEl('button', {
-				text: activeTemplate.isBuiltIn ? 'View Template' : 'Edit Template',
+				text: activeTemplate.isBuiltIn ? 'View template' : 'Edit template',
 			});
 			editBtn.addEventListener('click', () => {
 				this.openTemplateModal(activeTemplate.isBuiltIn ? 'view' : 'edit', activeTemplate);
@@ -463,7 +460,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 
 			// Duplicate button (for built-in templates to create editable copy)
 			if (activeTemplate.isBuiltIn) {
-				const duplicateBtn = buttonContainer.createEl('button', { text: 'Duplicate & Edit' });
+				const duplicateBtn = buttonContainer.createEl('button', { text: 'Duplicate & edit' });
 				duplicateBtn.addEventListener('click', () => {
 					this.duplicateTemplate(activeTemplate);
 				});
@@ -473,23 +470,23 @@ export class FlashcardSettingTab extends PluginSettingTab {
 			if (!activeTemplate.isBuiltIn) {
 				const deleteBtn = buttonContainer.createEl('button', { text: 'Delete', cls: 'mod-warning' });
 				deleteBtn.addEventListener('click', () => {
-					this.deleteTemplate(activeTemplate);
+					void this.deleteTemplate(activeTemplate);
 				});
 			}
 		}
 
 		// Create new template button
-		const createBtn = buttonContainer.createEl('button', { text: 'Create New Template', cls: 'mod-cta' });
+		const createBtn = buttonContainer.createEl('button', { text: 'Create new template', cls: 'mod-cta' });
 		createBtn.addEventListener('click', () => {
 			this.openTemplateModal('create', null);
 		});
 
 		// Template preview section
 		if (activeTemplate) {
-			containerEl.createEl('h3', { text: 'Template Preview', cls: 'template-preview-header' });
+			new Setting(containerEl).setName("Template preview").setHeading();
 
 			// System prompt preview
-			containerEl.createEl('label', { text: 'System Prompt:', cls: 'template-label' });
+			containerEl.createEl('label', { text: 'System prompt:', cls: 'template-label' });
 			const systemPromptContainer = containerEl.createDiv({ cls: 'template-preview-container' });
 			const systemPromptArea = new TextAreaComponent(systemPromptContainer);
 			systemPromptArea
@@ -499,7 +496,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 			systemPromptArea.inputEl.addClass('template-preview-textarea');
 
 			// Output instructions preview
-			containerEl.createEl('label', { text: 'Output Format Instructions:', cls: 'template-label' });
+			containerEl.createEl('label', { text: 'Output format instructions:', cls: 'template-label' });
 			const outputContainer = containerEl.createDiv({ cls: 'template-preview-container' });
 			const outputArea = new TextAreaComponent(outputContainer);
 			outputArea
@@ -514,11 +511,11 @@ export class FlashcardSettingTab extends PluginSettingTab {
 	 * Open the template modal for viewing, editing, or creating.
 	 */
 	private openTemplateModal(mode: 'view' | 'edit' | 'create', template: FlashcardTemplate | null): void {
-		new TemplateModal(this.app, mode, template, async (result) => {
+		new TemplateModal(this.app, mode, template, (result) => {
 			if (result.action === 'save' && result.template) {
-				await this.saveTemplate(result.template);
+				void this.saveTemplate(result.template);
 			} else if (result.action === 'delete' && result.template) {
-				await this.deleteTemplate(result.template);
+				void this.deleteTemplate(result.template);
 			}
 		}).open();
 	}
@@ -581,7 +578,7 @@ export class FlashcardSettingTab extends PluginSettingTab {
 	}
 
 	private renderGenerationSection(containerEl: HTMLElement): void {
-		containerEl.createEl('h2', { text: 'Generation Parameters' });
+		new Setting(containerEl).setName("Generation parameters").setHeading();
 
 		new Setting(containerEl)
 			.setName('Temperature')

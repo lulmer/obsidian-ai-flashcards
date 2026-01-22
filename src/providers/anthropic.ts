@@ -53,7 +53,7 @@ export class AnthropicProvider extends BaseLLMProvider {
 				systemPrompt = msg.content;
 			} else {
 				anthropicMessages.push({
-					role: msg.role as 'user' | 'assistant',
+					role: msg.role,
 					content: msg.content,
 				});
 			}

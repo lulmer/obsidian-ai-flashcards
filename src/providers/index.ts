@@ -57,7 +57,9 @@ export function createProvider(settings: FlashcardSettings): BaseLLMProvider {
 			return new OpenAICompatibleProvider(config);
 		}
 
-		default:
-			throw new Error(`Unknown provider: ${activeProvider}`);
+		default: {
+			const _exhaustive: never = activeProvider;
+			throw new Error(`Unknown provider: ${_exhaustive as string}`);
+		}
 	}
 }

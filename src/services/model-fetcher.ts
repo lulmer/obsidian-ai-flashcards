@@ -13,6 +13,37 @@ export interface ModelFetchResult {
 	error?: string;
 }
 
+// API response types
+interface OpenAIModel {
+	id: string;
+}
+
+interface OpenAIModelsResponse {
+	data: OpenAIModel[];
+}
+
+interface GeminiModel {
+	name: string;
+	displayName?: string;
+	description?: string;
+	supportedGenerationMethods?: string[];
+}
+
+interface GeminiModelsResponse {
+	models: GeminiModel[];
+}
+
+interface OpenAICompatibleModel {
+	id?: string;
+	name?: string;
+	model?: string;
+}
+
+interface OpenAICompatibleResponse {
+	data?: OpenAICompatibleModel[];
+	models?: OpenAICompatibleModel[];
+}
+
 /**
  * Fetch available models from LLM provider APIs.
  */
@@ -66,10 +97,10 @@ export class ModelFetcher {
 			return { success: false, models: [], error: `API error: ${response.status}` };
 		}
 
-		const data = response.json;
+		const data = response.json as OpenAIModelsResponse;
 		const models: ModelInfo[] = data.data
 			// Filter for chat models (gpt-*)
-			.filter((m: { id: string }) =>
+			.filter(m =>
 				m.id.startsWith('gpt-') &&
 				!m.id.includes('instruct') &&
 				!m.id.includes('vision') &&
@@ -77,8 +108,8 @@ export class ModelFetcher {
 				!m.id.includes('audio')
 			)
 			// Sort by name, newest first
-			.sort((a: { id: string }, b: { id: string }) => b.id.localeCompare(a.id))
-			.map((m: { id: string }) => ({
+			.sort((a, b) => b.id.localeCompare(a.id))
+			.map(m => ({
 				id: m.id,
 				name: this.formatOpenAIModelName(m.id),
 			}));
@@ -157,20 +188,20 @@ export class ModelFetcher {
 			return { success: false, models: [], error: `API error: ${response.status}` };
 		}
 
-		const data = response.json;
+		const data = response.json as GeminiModelsResponse;
 		const models: ModelInfo[] = data.models
 			// Filter for generateContent capable models
-			.filter((m: { supportedGenerationMethods?: string[], name: string }) =>
+			.filter(m =>
 				m.supportedGenerationMethods?.includes('generateContent') &&
 				m.name.includes('gemini')
 			)
-			.map((m: { name: string, displayName?: string, description?: string }) => ({
+			.map(m => ({
 				id: m.name.replace('models/', ''),
-				name: m.displayName || m.name.replace('models/', ''),
+				name: m.displayName ?? m.name.replace('models/', ''),
 				description: m.description,
 			}))
 			// Sort to put newer/flash models first
-			.sort((a: ModelInfo, b: ModelInfo) => {
+			.sort((a, b) => {
 				// Prioritize 2.0 > 1.5 > 1.0
 				const aVersion = a.id.includes('2.0') ? 3 : a.id.includes('1.5') ? 2 : 1;
 				const bVersion = b.id.includes('2.0') ? 3 : b.id.includes('1.5') ? 2 : 1;
@@ -213,10 +244,10 @@ export class ModelFetcher {
 			return { success: false, models: [], error: `Endpoint error: ${response.status}` };
 		}
 
-		const data = response.json;
+		const data = response.json as OpenAICompatibleModel[] | OpenAICompatibleResponse;
 
 		// Handle both OpenAI format and Ollama format
-		let modelList: { id?: string; name?: string; model?: string }[] = [];
+		let modelList: OpenAICompatibleModel[] = [];
 
 		if (Array.isArray(data)) {
 			// Ollama format: array of objects with 'name' or 'model'
@@ -231,8 +262,8 @@ export class ModelFetcher {
 
 		const models: ModelInfo[] = modelList
 			.map(m => ({
-				id: m.id || m.name || m.model || '',
-				name: m.id || m.name || m.model || '',
+				id: m.id ?? m.name ?? m.model ?? '',
+				name: m.id ?? m.name ?? m.model ?? '',
 			}))
 			.filter(m => m.id);
 
