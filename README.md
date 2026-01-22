@@ -1,90 +1,106 @@
-# Obsidian Sample Plugin
+# AI Flashcards for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Generate flashcards from your notes using AI. Compatible with the [Spaced Repetition](https://github.com/st3v3nmw/obsidian-spaced-repetition) plugin.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Features
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+### Multiple AI Providers
 
-## First time developing plugins?
+Choose your preferred LLM provider:
 
-Quick starting guide for new plugin devs:
+- **OpenAI** - GPT models
+- **Anthropic** - Claude Sonnet, Claude Opus, Claude Haiku
+- **Google Gemini** - Gemini Flash, Gemini Pro
+- **Custom Endpoints** - Any OpenAI-compatible API (Ollama, LM Studio, vLLM, etc.)
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+The plugin can fetch available models directly from each provider's API.
 
-## Releasing new releases
+### Built-in Templates
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+5 ready-to-use templates for different learning styles:
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+| Template | Best For |
+|----------|----------|
+| **Basic Recall** | Definitions, facts, straightforward concepts |
+| **Concept Explanation** | Deep understanding, "explain in your own words" |
+| **Cloze Deletions** | Fill-in-the-blank for terminology and key phrases |
+| **Compare & Contrast** | Similarities and differences between related topics |
+| **Application-Based** | Practical skills, problem-solving scenarios |
 
-## Adding your plugin to the community plugin list
+You can also create your own custom templates or duplicate built-in ones to customize them.
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+### Smart Output Options
 
-## How to use
+- **Create new file** - Saves flashcards to a dedicated folder (default: `Flashcards/`)
+- **Append to note** - Adds flashcards directly to your current note
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+Output uses the `Q: / A:` format compatible with the Spaced Repetition plugin.
 
-## Manually installing the plugin
+### Long Document Support
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+Automatically chunks long notes to stay within model context limits. Configure the chunk size based on your model's capabilities:
+- Cloud APIs (OpenAI, Anthropic, Gemini): 4000-8000 tokens
+- Local models (Ollama, LM Studio): 2000-3000 tokens
 
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+### Non-blocking Generation
 
-## Funding URL
+Flashcard generation runs in the background, so you can continue working while cards are being created. Progress is shown in the status bar.
 
-You can include funding URLs where people who use your plugin can financially support it.
+## Installation
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+### From Community Plugins (Recommended)
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+1. Open Obsidian Settings
+2. Go to Community Plugins and disable Safe Mode
+3. Click Browse and search for "AI Flashcards"
+4. Install and enable the plugin
 
-If you have multiple URLs, you can also do:
+### Manual Installation
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+1. Download the latest release from GitHub
+2. Extract `main.js`, `styles.css`, and `manifest.json` to your vault's `.obsidian/plugins/ai-flashcards/` folder
+3. Enable the plugin in Settings > Community Plugins
 
-## API Documentation
+## Setup
 
-See https://docs.obsidian.md
+1. Go to Settings > AI Flashcards
+2. Select your LLM provider
+3. Enter your API key (or configure your local endpoint URL)
+4. Choose a template and output mode
+5. Open a note and click the flashcard icon in the ribbon (or use the command palette)
+
+## Usage
+
+1. Open any note you want to create flashcards from
+2. Click the **flashcard icon** in the left ribbon, or
+3. Use the command palette: `AI Flashcards: Generate flashcards from current note`
+
+The plugin will generate 5-10 flashcards based on the note content and save them according to your output settings.
+
+## Configuration Options
+
+| Setting | Description |
+|---------|-------------|
+| **Active Provider** | Select OpenAI, Anthropic, Gemini, or Custom Endpoint |
+| **API Key** | Your provider's API key |
+| **Model** | Choose from available models (refresh to fetch latest) |
+| **Output Mode** | Create new file or append to current note |
+| **Output Folder** | Destination folder for flashcard files |
+| **Template** | Select or customize the flashcard generation style |
+| **Temperature** | Creativity level (0.0 = deterministic, 1.0 = creative) |
+| **Max Output Tokens** | Maximum response length |
+| **Max Input Tokens** | Chunk size for long documents |
+
+## Using with Local Models
+
+For local models via Ollama, LM Studio, or similar:
+
+1. Set provider to "Custom Endpoint (OpenAI-compatible)"
+2. Enter your endpoint URL (e.g., `http://localhost:11434` for Ollama)
+3. API key is optional for most local setups
+4. Click refresh to fetch available models, or enter the model name manually
+
+## Support
+
+- Report issues on [GitHub](https://github.com/louisulmer/obsidian-ai-flashcards/issues)
+- Contributions welcome via pull requests

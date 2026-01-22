@@ -1,99 +1,172 @@
-import {App, Editor, MarkdownView, Modal, Notice, Plugin} from 'obsidian';
-import {DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab} from "./settings";
+import { MarkdownView, Notice, Plugin, setIcon } from 'obsidian';
+import type { FlashcardSettings } from './types';
+import { FlashcardError } from './types';
+import { DEFAULT_SETTINGS, FlashcardSettingTab } from './settings';
+import { FlashcardGenerator } from './services/flashcard-generator';
 
-// Remember to rename these classes and interfaces!
+export default class AIFlashcardsPlugin extends Plugin {
+	settings: FlashcardSettings;
+	private generator: FlashcardGenerator;
+	private isGenerating = false;
+	private ribbonIconEl: HTMLElement | null = null;
+	private statusBarEl: HTMLElement | null = null;
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
-
-	async onload() {
+	async onload(): Promise<void> {
 		await this.loadSettings();
 
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('dice', 'Sample', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
+		this.generator = new FlashcardGenerator(this.app);
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status bar text');
-
-		// This adds a simple command that can be triggered anywhere
+		// Main command: Generate flashcards from current note
 		this.addCommand({
-			id: 'open-modal-simple',
-			name: 'Open modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'replace-selected',
-			name: 'Replace selected content',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				editor.replaceSelection('Sample editor command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-modal-complex',
-			name: 'Open modal (complex)',
+			id: 'generate-flashcards',
+			name: 'Generate flashcards from current note',
 			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
+				const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+				if (activeView?.file) {
 					if (!checking) {
-						new SampleModal(this.app).open();
+						this.generateFlashcards();
 					}
-
-					// This command will only show up in Command Palette when the check function returns true
 					return true;
 				}
 				return false;
-			}
+			},
 		});
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			new Notice("Click");
+		// Ribbon icon - deck of cards style (using "copy" icon which looks like stacked cards)
+		this.ribbonIconEl = this.addRibbonIcon('copy', 'Generate AI Flashcards', () => {
+			this.generateFlashcards();
 		});
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		// Add custom styling to make it look more like cards
+		this.ribbonIconEl.addClass('ai-flashcards-ribbon');
 
+		// Status bar for showing generation progress
+		this.statusBarEl = this.addStatusBarItem();
+		this.statusBarEl.addClass('ai-flashcards-status');
+		this.statusBarEl.hide();
+
+		// Settings tab
+		this.addSettingTab(new FlashcardSettingTab(this.app, this));
 	}
 
-	onunload() {
+	onunload(): void {
+		// Cleanup if needed
 	}
 
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<MyPluginSettings>);
+	async loadSettings(): Promise<void> {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
-}
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
+	/**
+	 * Main workflow: Generate flashcards from the current note.
+	 * Runs in the background without blocking the UI.
+	 */
+	private async generateFlashcards(): Promise<void> {
+		// Prevent multiple concurrent generations
+		if (this.isGenerating) {
+			new Notice('Flashcard generation already in progress...');
+			return;
+		}
+
+		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		const file = activeView?.file;
+
+		if (!file) {
+			new Notice('No active note found. Please open a note first.');
+			return;
+		}
+
+		// Start generation (non-blocking)
+		this.isGenerating = true;
+		this.updateUI(true, file.basename);
+
+		// Run generation in background - don't await to keep UI responsive
+		this.runGenerationInBackground(file);
 	}
 
-	onOpen() {
-		let {contentEl} = this;
-		contentEl.setText('Woah!');
+	/**
+	 * Run the generation process in the background.
+	 */
+	private async runGenerationInBackground(file: import('obsidian').TFile): Promise<void> {
+		try {
+			// Progress callback to update status bar
+			const onProgress = (message: string) => {
+				this.updateStatusBar(message);
+			};
+
+			const result = await this.generator.generate(file, this.settings, onProgress);
+
+			// Show success message with chunk info if applicable
+			const count = result.flashcards.length;
+			const outputPath = result.outputFile.path;
+			const chunkInfo = result.chunksProcessed && result.chunksProcessed > 1
+				? ` (from ${result.chunksProcessed} chunks)`
+				: '';
+			new Notice(`Generated ${count} flashcard${count !== 1 ? 's' : ''}${chunkInfo} in ${outputPath}`);
+
+			// Open the output file if it's different from source
+			if (result.outputFile.path !== file.path) {
+				await this.app.workspace.openLinkText(result.outputFile.path, '', false);
+			}
+
+		} catch (error) {
+			this.handleError(error);
+		} finally {
+			this.isGenerating = false;
+			this.updateUI(false);
+		}
 	}
 
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
+	/**
+	 * Update UI elements to reflect generation state.
+	 */
+	private updateUI(generating: boolean, noteName?: string): void {
+		if (this.ribbonIconEl) {
+			if (generating) {
+				this.ribbonIconEl.addClass('is-generating');
+				this.ribbonIconEl.setAttribute('aria-label', 'Generating flashcards...');
+			} else {
+				this.ribbonIconEl.removeClass('is-generating');
+				this.ribbonIconEl.setAttribute('aria-label', 'Generate AI Flashcards');
+			}
+		}
+
+		if (this.statusBarEl) {
+			if (generating && noteName) {
+				this.statusBarEl.setText(`Generating flashcards for "${noteName}"...`);
+				this.statusBarEl.show();
+			} else {
+				this.statusBarEl.hide();
+			}
+		}
+	}
+
+	/**
+	 * Update just the status bar text (for progress updates).
+	 */
+	private updateStatusBar(message: string): void {
+		if (this.statusBarEl) {
+			this.statusBarEl.setText(message);
+		}
+	}
+
+	/**
+	 * Handle errors with user-friendly messages.
+	 */
+	private handleError(error: unknown): void {
+		if (error instanceof FlashcardError) {
+			new Notice(error.message);
+			console.error(`[AI Flashcards] ${error.type}:`, error.message, error.originalError);
+		} else if (error instanceof Error) {
+			new Notice(`Error: ${error.message}`);
+			console.error('[AI Flashcards] Unexpected error:', error);
+		} else {
+			new Notice('An unexpected error occurred. Check the console for details.');
+			console.error('[AI Flashcards] Unknown error:', error);
+		}
 	}
 }
