@@ -1,8 +1,142 @@
-/*
+/* AI Flashcards Plugin Styles */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* Ribbon Icon */
+.ai-flashcards-ribbon {
+	/* Base styling */
+}
 
-If your plugin does not need CSS, delete this file.
+.ai-flashcards-ribbon.is-generating {
+	animation: ai-flashcards-pulse 1.5s ease-in-out infinite;
+}
 
-*/
+@keyframes ai-flashcards-pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+}
+
+/* Status bar */
+.ai-flashcards-status {
+	font-size: 0.85em;
+	color: var(--text-muted);
+}
+
+/* Settings Page */
+.ai-flashcards-settings h2 {
+	margin-top: 1.5rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+	padding-bottom: 0.5rem;
+}
+
+/* Template Section */
+.template-description {
+	margin-bottom: 1rem;
+	font-style: italic;
+}
+
+.template-buttons {
+	display: flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	margin-bottom: 1.5rem;
+}
+
+.template-buttons button {
+	padding: 0.4rem 0.8rem;
+}
+
+.template-preview-header {
+	margin-top: 1rem;
+	margin-bottom: 0.5rem;
+	font-size: 1rem;
+}
+
+.template-label {
+	display: block;
+	font-weight: 500;
+	margin-top: 0.75rem;
+	margin-bottom: 0.25rem;
+	color: var(--text-normal);
+}
+
+.template-preview-container {
+	margin-bottom: 0.75rem;
+}
+
+.template-preview-textarea {
+	width: 100%;
+	font-family: var(--font-monospace);
+	font-size: 0.85rem;
+	background-color: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 0.5rem;
+	resize: vertical;
+}
+
+.template-preview-textarea:disabled {
+	opacity: 0.8;
+	cursor: default;
+}
+
+/* Template Modal */
+.ai-flashcards-template-modal {
+	padding: 1rem;
+}
+
+.ai-flashcards-template-modal h2 {
+	margin-top: 0;
+	margin-bottom: 1rem;
+}
+
+.ai-flashcards-template-modal h3 {
+	margin-top: 1.5rem;
+	margin-bottom: 0.5rem;
+	font-size: 1rem;
+}
+
+.ai-flashcards-template-modal .setting-item-description {
+	color: var(--text-muted);
+	font-size: 0.85rem;
+	margin-bottom: 0.5rem;
+}
+
+.template-textarea-container {
+	margin-bottom: 1rem;
+}
+
+.template-textarea {
+	width: 100%;
+	font-family: var(--font-monospace);
+	font-size: 0.85rem;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 0.5rem;
+	resize: vertical;
+}
+
+.template-textarea:disabled {
+	background-color: var(--background-secondary);
+	opacity: 0.8;
+}
+
+.template-modal-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	margin-top: 1.5rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.template-modal-buttons button {
+	padding: 0.5rem 1rem;
+}
+
+.template-modal-buttons button.mod-warning {
+	margin-right: auto;
+}

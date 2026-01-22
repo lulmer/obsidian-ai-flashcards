@@ -1,11 +1,13 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "ai-flashcards",
+	"name": "AI Flashcards",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "Generate flashcards from your notes using AI (OpenAI, Claude, Gemini, or local models). Multiple templates, smart chunking for long documents, compatible with Spaced Repetition plugin.",
+	"author": "Louis Ulmer",
+	"authorUrl": "https://github.com/louisulmer",
+	"isDesktopOnly": false,
+	"fundingUrl": {
+		"GitHub Sponsor": "https://github.com/sponsors/lulmer"
+	}
 }
