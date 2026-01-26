@@ -5,7 +5,7 @@
 	"minAppVersion": "0.15.0",
 	"description": "Generate flashcards from your notes using AI (OpenAI, Claude, Gemini, or local models). Multiple templates, smart chunking for long documents, compatible with Spaced Repetition plugin.",
 	"author": "Louis Ulmer",
-	"authorUrl": "https://github.com/louisulmer",
+	"authorUrl": "https://github.com/lulmer",
 	"isDesktopOnly": false,
 	"fundingUrl": {
 		"GitHub Sponsor": "https://github.com/sponsors/lulmer"
