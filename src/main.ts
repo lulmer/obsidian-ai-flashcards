@@ -65,7 +65,7 @@ export default class AIFlashcardsPlugin extends Plugin {
 	 * Main workflow: Generate flashcards from the current note.
 	 * Runs in the background without blocking the UI.
 	 */
-	private async generateFlashcards(): Promise<void> {
+	private generateFlashcards(): void {
 		// Prevent multiple concurrent generations
 		if (this.isGenerating) {
 			new Notice('Flashcard generation already in progress...');
